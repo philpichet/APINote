@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Repository\GradeRepository;
+use App\Repository\GradesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -16,10 +17,10 @@ class GradesController extends AbstractController
 {
     /**
      * @Route("", name="average", methods={"GET"})
-     * @param GradeRepository $repository
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param GradesRepository $repository
+     * @return JsonResponse
      */
-    public function average(GradeRepository $repository)
+    public function average(GradesRepository $repository)
     {
         $average = $repository->getAverageOfAll();
         return $this->json(['average' => round($average, 2)],200);
