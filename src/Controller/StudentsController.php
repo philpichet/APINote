@@ -2,19 +2,23 @@
 
 namespace App\Controller;
 
+use App\Entity\Grade;
 use App\Entity\Student;
+use App\Form\GradeType;
 use App\Form\StudentType;
+use App\Repository\GradeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
  * Class StudentsController
  * @package App\Controller
- * @Route("/api/students", name="api_studentd_")
+ * @Route("/api/students", name="api_students_")
  */
 class StudentsController extends AbstractController
 {
@@ -93,6 +97,50 @@ class StudentsController extends AbstractController
             return $this->json(["errors" => ['resource' => "Student can not be deleted"]], 400, ['Content-Type' => "application/json"]);
         }
 
+    }
+
+    /**
+     * Add a grade of a student
+     * @Route("/{id}/grades", requirements={"id"="\d+"}, methods={"POST"})
+     * @param Student|null $student
+     * @param Request $request
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function addGrade(?Student $student, Request $request, EntityManagerInterface $em)
+    {
+        if(!$student instanceof Student)
+            return $this->json(["errors" => ['resource' => "Student not found"]], 404, ['Content-Type' => "application/json"]);
+        $grade = new Grade();
+        $student->addGrade($grade);
+        $form = $this->createForm(GradeType::class, $grade);
+        $this->processForm($request, $form);
+        if($form->isValid()) {
+            try {
+                $em->persist($grade);
+                $em->flush();
+                return $this->json($grade, 201, [], ['groups' => ['newGrade']]);
+            } catch (\Exception $ex) {
+                return $this->json(["errors"=> ["resource"=> "The grade can not been insert"]], 400);
+            }
+        }
+        return $this->json(["errors" => $this->processErrors($form)], 400, ['Content-Type' => "application/json"]);
+    }
+
+    /**
+     * Return the average of the student's grade
+     * @Route("/{id}/grades", requirements={"id"="\d+"}, methods={"GET"})
+     * @param Student|null $student
+     * @param GradeRepository $repository
+     * @return JsonResponse
+     */
+    public function average(?Student $student, GradeRepository $repository)
+    {
+        if(!$student instanceof Student )
+            return $this->json(["errors" => ['resource' => 'Student not found']], 404);
+
+        $average = $repository->getAverageOfStudent($student);
+        return $this->json(['average' => round($average, 2)], 200);
     }
 
     /**
