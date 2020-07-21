@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\StudentRepository;
+use App\Repository\StudentsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,43 +10,54 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ORM\Entity(repositoryClass=StudentRepository::class)
+ * @ORM\Entity(repositoryClass=StudentsRepository::class)
  */
-class Student
+class Students
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"newGrade"})
+     * @Groups({"newGrade", "newStudent", "updateStudent","studentAverage"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
-     * @Groups({"newGrade"})
+     * @Assert\Length(min=3, max=100)
+     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
-     * @Groups({"newGrade"})
+     * @Assert\Length(min=3, max=100)
+     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="date")
+     * @Assert\NotNull()
      * @Assert\LessThan("today")
-     * @Groups({"newGrade"})
+     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
     private $birthdate;
 
     /**
-     * @ORM\OneToMany(targetEntity=Grade::class, mappedBy="student", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Grades::class, mappedBy="student", orphanRemoval=true)
+     * @Groups({"updateStudent"})
      */
     private $grades;
+
+    /**
+     * This attribute is used for the average request StudentsController::average
+     * @var float
+     * @Groups({"studentAverage"})
+     */
+    public float $average;
 
     public function __construct()
     {
@@ -63,7 +74,7 @@ class Student
         return $this->firstname;
     }
 
-    public function setFirstname(string $firstname): self
+    public function setFirstname(?string $firstname): self
     {
         $this->firstname = $firstname;
 
@@ -75,7 +86,7 @@ class Student
         return $this->lastname;
     }
 
-    public function setLastname(string $lastname): self
+    public function setLastname(?string $lastname): self
     {
         $this->lastname = $lastname;
 
@@ -87,7 +98,7 @@ class Student
         return $this->birthdate;
     }
 
-    public function setBirthdate(\DateTimeInterface $birthdate): self
+    public function setBirthdate(?\DateTimeInterface $birthdate): self
     {
         $this->birthdate = $birthdate;
 
@@ -95,14 +106,14 @@ class Student
     }
 
     /**
-     * @return Collection|Grade[]
+     * @return Collection|Grades[]
      */
     public function getGrades(): Collection
     {
         return $this->grades;
     }
 
-    public function addGrade(Grade $grade): self
+    public function addGrade(Grades $grade): self
     {
         if (!$this->grades->contains($grade)) {
             $this->grades[] = $grade;
@@ -112,7 +123,7 @@ class Student
         return $this;
     }
 
-    public function removeGrade(Grade $grade): self
+    public function removeGrade(Grades $grade): self
     {
         if ($this->grades->contains($grade)) {
             $this->grades->removeElement($grade);

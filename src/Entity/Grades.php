@@ -2,40 +2,41 @@
 
 namespace App\Entity;
 
-use App\Repository\GradeRepository;
+use App\Repository\GradesRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ORM\Entity(repositoryClass=GradeRepository::class)
+ * @ORM\Entity(repositoryClass=GradesRepository::class)
  */
-class Grade
+class Grades
 {
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"newGrade"})
+     * @Groups({"newGrade", "updateStudent"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\Range(min="0", max="20")
-     * @Groups({"newGrade"})
+     * @Groups({"newGrade", "updateStudent"})
      */
     private $grade;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
-     * @Groups({"newGrade"})
+     * @Assert\Length(min=3, max=100)
+     * @Groups({"newGrade", "updateStudent"})
      */
     private $matter;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Student::class, inversedBy="grades")
+     * @ORM\ManyToOne(targetEntity=Students::class, inversedBy="grades")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"newGrade"})
      */
@@ -70,12 +71,12 @@ class Grade
         return $this;
     }
 
-    public function getStudent(): ?Student
+    public function getStudent(): ?Students
     {
         return $this->student;
     }
 
-    public function setStudent(?Student $student): self
+    public function setStudent(?Students $student): self
     {
         $this->student = $student;
         return $this;

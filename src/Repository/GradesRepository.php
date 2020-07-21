@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Grade;
-use App\Entity\Student;
+use App\Entity\Grades;
+use App\Entity\Students;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method Grade|null find($id, $lockMode = null, $lockVersion = null)
- * @method Grade|null findOneBy(array $criteria, array $orderBy = null)
- * @method Grade[]    findAll()
- * @method Grade[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Grades|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Grades|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Grades[]    findAll()
+ * @method Grades[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class GradeRepository extends ServiceEntityRepository
+class GradesRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Grade::class);
+        parent::__construct($registry, Grades::class);
     }
 
 
-    public function getAverageOfStudent(Student $student)
+    public function getAverageOfStudent(Students $student)
     {
         return $this->createQueryBuilder("g")
             ->innerJoin("g.student", "s")
@@ -41,7 +41,7 @@ class GradeRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
     // /**
-    //  * @return Grade[] Returns an array of Grade objects
+    //  * @return Grades[] Returns an array of Grades objects
     //  */
     /*
     public function findByExampleField($value)
@@ -58,7 +58,7 @@ class GradeRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?Grade
+    public function findOneBySomeField($value): ?Grades
     {
         return $this->createQueryBuilder('g')
             ->andWhere('g.exampleField = :val')

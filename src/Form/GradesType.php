@@ -2,12 +2,12 @@
 
 namespace App\Form;
 
-use App\Entity\Grade;
+use App\Entity\Grades;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class GradeType extends AbstractType
+class GradesType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -20,7 +20,7 @@ class GradeType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Grade::class,
+            'data_class' => Grades::class,
             "csrf_protection" => false
         ]);
     }
