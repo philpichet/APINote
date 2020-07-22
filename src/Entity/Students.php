@@ -25,6 +25,7 @@ class Students
     /**
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
+     * @Assert\Length(min=3, max=100)
      * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
     private $firstname;
@@ -32,12 +33,14 @@ class Students
     /**
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
+     * @Assert\Length(min=3, max=100)
      * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="date")
+     * @Assert\NotNull()
      * @Assert\LessThan("today")
      * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
      */
@@ -50,7 +53,7 @@ class Students
     private $grades;
 
     /**
-     * This attribute is used for the average request
+     * This attribute is used for the average request StudentsController::average
      * @var float
      * @Groups({"studentAverage"})
      */

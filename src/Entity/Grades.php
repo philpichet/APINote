@@ -28,8 +28,9 @@ class Grades
     private $grade;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
+     * @Assert\Length(min=3, max=100)
      * @Groups({"newGrade", "updateStudent"})
      */
     private $matter;
