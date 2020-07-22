@@ -16,14 +16,14 @@ class Grades
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"newGrade", "updateStudent"})
+     * @Groups({"newGrade"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\Range(min="0", max="20")
-     * @Groups({"newGrade", "updateStudent"})
+     * @Groups({"newGrade", "student"})
      */
     private $grade;
 
@@ -31,9 +31,9 @@ class Grades
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
      * @Assert\Length(min=3, max=100)
-     * @Groups({"newGrade", "updateStudent"})
+     * @Groups({"newGrade", "student"})
      */
-    private $matter;
+    private $course;
 
     /**
      * @ORM\ManyToOne(targetEntity=Students::class, inversedBy="grades")
@@ -59,14 +59,14 @@ class Grades
         return $this;
     }
 
-    public function getMatter(): ?string
+    public function getCourse(): ?string
     {
-        return $this->matter;
+        return $this->course;
     }
 
-    public function setMatter(string $matter): self
+    public function setCourse(string $course): self
     {
-        $this->matter = $matter;
+        $this->course = $course;
 
         return $this;
     }

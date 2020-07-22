@@ -12,16 +12,30 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 /**
  * Class StudentsController
  * @package App\Controller
- * @Route("/api/students", name="api_students_", condition="request.headers.get('Accept') === 'application/json' and request.headers.get('Content-Type') === 'application/json'")
+ * @Route("/api/students", name="api_students_")
  */
 class StudentsController extends AbstractController
 {
+
+    /**
+     * Return the list of student and the average of the class
+     * @Route("", name="list", methods={"GET"})
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+     */
+    public function list(EntityManagerInterface $em)
+    {
+        $average = $em->getRepository(Grades::class)->getAverageOfAll();
+        $students = $em->getRepository(Students::class)->findAll();
+        return $this->json(['average' => round($average, 2), "students" => $students], 200, [], ['groups' => ["students"], DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
+    }
     /**
      * Add a student
      * @Route("", name="add", methods={"POST"})
@@ -38,7 +52,7 @@ class StudentsController extends AbstractController
             $em->persist($student);
             try {
                 $em->flush();
-                return $this->json($student, 201, [], ['groups' => 'newStudent', DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
+                return $this->json($student, 201, [], ['groups' => 'student', DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
             } catch (\Exception $e) {
                 // The insertion failed, we return an error code and content
                 return $this->json(["errors" => ['resource' => "Students has not been created"]], 503);
@@ -48,6 +62,23 @@ class StudentsController extends AbstractController
         // We return the array of errors
         return $this->json(["errors" => $this->processErrors($form)], 400);
     }
+
+    /**
+     * Return the student
+     * @Route("/{id}", name="show", requirements={"id"="\d+"}, methods={"GET"})
+     * @param Students|null $student
+     * @param GradesRepository $repository
+     * @return JsonResponse
+     */
+    public function show(?Students $student, GradesRepository $repository)
+    {
+        if (!$student instanceof Students)
+            return $this->json(["errors" => ['resource' => 'Students not found']], 404);
+
+        $student->average = round($repository->getAverageOfStudent($student), 2);
+        return $this->json($student, 200, [], ['groups' => ["student","studentAverage"], DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
+    }
+
 
     /**
      * Update a student
@@ -66,7 +97,7 @@ class StudentsController extends AbstractController
         if ($form->isValid()) {
             try {
                 $em->flush();
-                return $this->json($student, 200, [], ['groups' => "updateStudent", DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
+                return $this->json($student, 200, [], ['groups' => "student", DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
             } catch (\Exception $e) {
                 // The update failed, we return an error code and content
                 return $this->json(["errors" => ['resource' => "Students has not been updated"]], 503);
@@ -74,31 +105,6 @@ class StudentsController extends AbstractController
         }
         // We return the array of error
         return $this->json(["errors" => $this->processErrors($form)], 400);
-    }
-
-
-    /**
-     * Delete a student
-     * @Route("/{id}", name="delete", methods={"DELETE"})
-     * @param Students|null $student
-     * @param Request $request
-     * @param EntityManagerInterface $em
-     * @return JsonResponse
-     */
-    public function delete(?Students $student, Request $request, EntityManagerInterface $em)
-    {
-        if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => "Students not found"]], 404);
-
-        $em->remove($student);
-        try {
-            $em->flush();
-            return $this->json(null, 204);
-        } catch (\Exception $e) {
-            // The delete failed, we return an error code and content
-            return $this->json(["errors" => ['resource' => "Students has not been deleted"]], 503);
-        }
-
     }
 
     /**
@@ -131,19 +137,27 @@ class StudentsController extends AbstractController
     }
 
     /**
-     * Return the average of the student's grade
-     * @Route("/{id}/average", requirements={"id"="\d+"}, methods={"GET"})
+     * Delete a student
+     * @Route("/{id}", name="delete", methods={"DELETE"})
      * @param Students|null $student
-     * @param GradesRepository $repository
+     * @param Request $request
+     * @param EntityManagerInterface $em
      * @return JsonResponse
      */
-    public function average(?Students $student, GradesRepository $repository)
+    public function delete(?Students $student, Request $request, EntityManagerInterface $em)
     {
         if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => 'Students not found']], 404);
+            return $this->json(["errors" => ['resource' => "Students not found"]], 404);
 
-        $student->average = round($repository->getAverageOfStudent($student), 2);
-        return $this->json($student, 200, [], ['groups' => "studentAverage", DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
+        $em->remove($student);
+        try {
+            $em->flush();
+            return $this->json(null, 204);
+        } catch (\Exception $e) {
+            // The delete failed, we return an error code and content
+            return $this->json(["errors" => ['resource' => "Students has not been deleted"]], 503);
+        }
+
     }
 
     /**
@@ -153,7 +167,13 @@ class StudentsController extends AbstractController
      */
     private function processForm(Request $request, FormInterface $form)
     {
-        $data = json_decode($request->getContent(), true);
+        if($request->headers->has("content-type") && $request->headers->get("content-type") === "application/json") {
+            $data = json_decode($request->getContent(), true);
+        } else if ($request->headers->has("content-type") && $request->headers->get("content-type") === "application/x-www-form-urlencoded") {
+            $data = $request->request->all();
+        } else {
+            throw new BadRequestHttpException("MIME Type can be application/x-www-form-urlencoded or application/json");
+        }
         $form->submit($data);
     }
 
@@ -166,7 +186,9 @@ class StudentsController extends AbstractController
     {
         $errors = [];
         if(!is_bool($form->getErrors()->getChildren()))
+            // The form contains a global error, we had in the resource key
             $errors['resource'] = $form->getErrors()->getChildren()->getMessage();
+        // Loop on each fiel for add all error if not valid
         foreach ($form->all() as $field) {
             if ($field->isValid())
                 continue;

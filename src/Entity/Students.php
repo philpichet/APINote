@@ -18,7 +18,7 @@ class Students
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"newGrade", "newStudent", "updateStudent","studentAverage"})
+     * @Groups({"students","student","newGrade", "studentAverage"})
      */
     private $id;
 
@@ -26,7 +26,7 @@ class Students
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
      * @Assert\Length(min=3, max=100)
-     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
+     * @Groups({"students","student","newGrade", "studentAverage"})
      */
     private $firstname;
 
@@ -34,7 +34,7 @@ class Students
      * @ORM\Column(type="string", length=100)
      * @Assert\NotNull()
      * @Assert\Length(min=3, max=100)
-     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
+     * @Groups({"students","student","newGrade", "studentAverage"})
      */
     private $lastname;
 
@@ -42,13 +42,13 @@ class Students
      * @ORM\Column(type="date")
      * @Assert\NotNull()
      * @Assert\LessThan("today")
-     * @Groups({"newGrade","newStudent", "updateStudent","studentAverage"})
+     * @Groups({"students","student","newGrade", "studentAverage"})
      */
     private $birthdate;
 
     /**
      * @ORM\OneToMany(targetEntity=Grades::class, mappedBy="student", orphanRemoval=true)
-     * @Groups({"updateStudent"})
+     * @Groups({"student"})
      */
     private $grades;
 
