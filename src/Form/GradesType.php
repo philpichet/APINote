@@ -7,6 +7,11 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Class GradesType
+ * @package App\Form
+ * Form to create a Grade.
+ */
 class GradesType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -21,6 +26,7 @@ class GradesType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Grades::class,
+            // We remove the csrf protection
             "csrf_protection" => false
         ]);
     }

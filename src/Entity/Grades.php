@@ -9,6 +9,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=GradesRepository::class)
+ * This class is the representation of the grade
  */
 class Grades
 {

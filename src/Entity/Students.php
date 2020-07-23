@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=StudentsRepository::class)
+ * This class is the representation of student.
  */
 class Students
 {
@@ -53,7 +54,7 @@ class Students
     private $grades;
 
     /**
-     * This attribute is used for the average request StudentsController::average
+     * This attribute is used on the request StudentsController::show
      * @var float
      * @Groups({"studentAverage"})
      */

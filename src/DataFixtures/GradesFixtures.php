@@ -7,6 +7,11 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
+/**
+ * Class GradesFixtures
+ * This is used to fill the database with fake data for test.
+ * @package App\DataFixtures
+ */
 class GradesFixtures extends Fixture implements DependentFixtureInterface
 {
     /**

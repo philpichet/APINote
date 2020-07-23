@@ -17,6 +17,7 @@ class StudentsType extends AbstractType
             ->add('firstname')
             ->add('lastname')
             ->add('birthdate',DateType::class, [
+                // Format the content to string
                 "widget" => "single_text"
             ])
         ;
@@ -26,6 +27,7 @@ class StudentsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Students::class,
+            // Remove the csrf protection.
             "csrf_protection" => false,
         ]);
     }

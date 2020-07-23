@@ -45,12 +45,14 @@ class StudentsController extends AbstractController
      */
     public function add(Request $request, EntityManagerInterface $em)
     {
+        // Instantiate a student and create a form with him
         $student = new Students();
         $form = $this->createForm(StudentsType::class, $student);
         $this->processForm($request, $form);
         if ($form->isValid()) {
             $em->persist($student);
             try {
+                // The data send are valid, we save the student
                 $em->flush();
                 return $this->json($student, 201, [], ['groups' => 'student', DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
             } catch (\Exception $e) {
@@ -65,6 +67,7 @@ class StudentsController extends AbstractController
 
     /**
      * Return the student
+     * We can improve this action by using the annotation `@Entity` to use a query that return the student and all his grades to avoid to make multiple request on the serialisation
      * @Route("/{id}", name="show", requirements={"id"="\d+"}, methods={"GET"})
      * @param Students|null $student
      * @param GradesRepository $repository
@@ -92,10 +95,12 @@ class StudentsController extends AbstractController
     {
         if (!$student instanceof Students)
             return $this->json(["errors" => ['resource' => "Student not found"]], 404);
+        // Generate the form with the student to prefill it
         $form = $this->createForm(StudentsType::class, $student);
         $this->processForm($request, $form);
         if ($form->isValid()) {
             try {
+                // The data send are good, we update the student
                 $em->flush();
                 return $this->json($student, 200, [], ['groups' => "student", DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
             } catch (\Exception $e) {
@@ -120,16 +125,18 @@ class StudentsController extends AbstractController
         if (!$student instanceof Students)
             return $this->json(["errors" => ['resource' => "Student not found"]], 404);
         $grade = new Grades();
-        // Attache the grade to the student
+        // Attache the grade to the student and create a form with the grade instantiation.
         $student->addGrade($grade);
         $form = $this->createForm(GradesType::class, $grade);
         $this->processForm($request, $form);
         if ($form->isValid()) {
             try {
+                // The data send are good, we save the grade
                 $em->persist($grade);
                 $em->flush();
                 return $this->json($grade, 201, [], ['groups' => ['newGrade', DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]]);
             } catch (\Exception $ex) {
+                // The insert failed, we return an error code and content
                 return $this->json(["errors" => ["resource" => "Grade has not been insert"]], 503);
             }
         }
@@ -167,13 +174,14 @@ class StudentsController extends AbstractController
      */
     private function processForm(Request $request, FormInterface $form)
     {
-        if($request->headers->has("content-type") && $request->headers->get("content-type") === "application/json") {
+        // Check the content type send to get the data
+        if($request->headers->has("content-type") && $request->headers->get("content-type") === "application/json")
             $data = json_decode($request->getContent(), true);
-        } else if ($request->headers->has("content-type") && $request->headers->get("content-type") === "application/x-www-form-urlencoded") {
+        else if ($request->headers->has("content-type") && $request->headers->get("content-type") === "application/x-www-form-urlencoded")
             $data = $request->request->all();
-        } else {
+        else
             throw new BadRequestHttpException("MIME Type can be application/x-www-form-urlencoded or application/json");
-        }
+        // Submit the form with the data
         $form->submit($data);
     }
 
@@ -190,9 +198,8 @@ class StudentsController extends AbstractController
             $errors['resource'] = $form->getErrors()->getChildren()->getMessage();
         // Loop on each fiel for add all error if not valid
         foreach ($form->all() as $field) {
-            if ($field->isValid())
-                continue;
-            $errors[$field->getName()] = $field->getErrors()->getChildren()->getMessage();
+            if (!$field->isValid())
+                $errors[$field->getName()] = $field->getErrors()->getChildren()->getMessage();
         }
         return $errors;
     }

@@ -21,6 +21,14 @@ class GradesRepository extends ServiceEntityRepository
     }
 
 
+    /**
+     * Get the average of a student's grade
+     * If there is no not, the average is set to 0 with COALESCE
+     * @param Students $student
+     * @return int|mixed|string
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getAverageOfStudent(Students $student)
     {
         return $this->createQueryBuilder("g")
@@ -32,6 +40,13 @@ class GradesRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * Get the average of the class
+     * If there is no not, the average is set to 0 with COALESCE
+     * @return int|mixed|string
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getAverageOfAll()
     {
         return $this->createQueryBuilder("g")

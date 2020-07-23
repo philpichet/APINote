@@ -84,9 +84,17 @@ Pour configurer la base de donnée de test, il est nécessaire de renseigner la 
 ```sh 
 # Remplissage de la base de données 
 php bin/console doctrine:fixtures:load
-# lancer les test
+# excecution des tests
 php bin/phpunit
 ```
+
+## Sécurité
+
+L'API ne contient pas de système d'authentification.
+
+Dans une utilisation publique, un système d'authentification soit avec utilisateur/mot de passe soit par bearer authentication serait nécessaire.
+
+Afin de réduire l'exposition d'id, un champ slug pourrait être ajouté à `Student` comment identifiant unique utilisé dans les URI.
 
 ## Prérequis
 
@@ -95,7 +103,6 @@ Url de base : `https://api.monsite.com/`
 Chaque requête doit contenir les headers :
    - Content-Type : `application/json` ou `application/x-www-form-urlencoded`
    - Accept: `application/json`
-
 
 ## Points d'entrée
 
