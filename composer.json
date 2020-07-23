@@ -1,4 +1,6 @@
 {
+    "name": "phil/apinote",
+    "version": "0.0.0-dev",
     "type": "project",
     "license": "proprietary",
     "require": {
