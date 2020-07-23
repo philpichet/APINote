@@ -73,6 +73,21 @@ php bin/console doctrine:database:create
 php bin/console doctrine:migration:migrate
 ```
 
+### Test et fixtures
+L'API comporte des tests fonctionnels.
+
+Pour permettre la gestion des données stocké en base lors des tests, il est prévu l'insertion de données à l'aide du bundle [DoctrineFixtureBundle](https://symfony.com/doc/current/bundles/DoctrineFixturesBundle/index.html).
+Cela créera un `Student` ainsi que 10 `Grade` dont la note va de 1 à 10.
+
+Pour configurer la base de donnée de test, il est nécessaire de renseigner la clé `DATABASE_URL` dans le fichier `.env.local.test`
+
+```sh 
+# Remplissage de la base de données 
+php bin/console doctrine:fixtures:load
+# lancer les test
+php bin/phpunit
+```
+
 ## Prérequis
 
 Url de base : `https://api.monsite.com/`
