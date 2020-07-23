@@ -1,41 +1,41 @@
 # API Note
 
 API Note est une API REST permettant la gestion :
- - D'élève : personne noté lors d'un cours. Il ne dispose pas de caractères unique. 
-     Un élève est representé par la ressource `Student`.
-     Elle est définie par :
+ - D'élève : personne notée lors d'un cours. Plusieurs élèves peuvent partager le même nom, prénom et/ou date de naissance.<br>
+Un élève est representé par la ressource `Student`. <br>
+Elle est définie par :
      - `id`: identifiant unique
          - Type : integer
          - Auto-géneré
      - `lastname` : nom de l’élève
-         - Type: string
-         - Contraintes:
-             - Obligatoire
-             - Entre 3 et 100 caractères
-     - `firstname` : prénom de l’élève
-         - Type: string
+         - Type : string
          - Contraintes :
              - Obligatoire
              - Entre 3 et 100 caractères
-     - `birthdate` : date de naissance de l’élève au format YYYY-mm-dd
+     - `firstname` : prénom de l’élève
+         - Type : string
+         - Contraintes :
+             - Obligatoire
+             - Entre 3 et 100 caractères
+     - `birthdate` : date de naissance de l’élève au format YYYY-MM-DD
          - Type : Date
          - Contrainte :
              - Obligatoire
              - Date antérieure à aujourd’hui
 
- - De note : valeur attribué au travail d'un élève dans un cours
-    Une note est représentée par la ressource `Grade`.
-    Elle est définie par :
+ - De note : valeur attribuée au travail d'un élève dans un cours. <br>
+ Une note est représentée par la ressource `Grade`. <br>
+ Elle est définie par :
     - `id` : identifiant unique
         - Type : integer
         - Auto-géneré
     - `grade` : valeur de la note
-        - Type: integer
+        - Type : integer
         - Contraintes :
             - Obligatoire
             - Entre 0 et 20
-    - `matter` : matière notée
-        - Type: string
+    - `course` : matière notée
+        - Type : string
         - Contraintes :
             - Obligatoire
             - Entre 3 et 100 caractères
@@ -45,21 +45,26 @@ API Note est une API REST permettant la gestion :
             - Obligatoire
             - Relation par l'id de `Student`
 
+La moyenne est calculée en base et arrondie à deux chiffres après la virgule.
+
 ## Technologie et Installation
 
 API Note est écrit en PHP 7.4 et utilise le framework Symfony 5.1
 
-L'API nécessite un serveur web ( Apache ou NGinx) ainsi qu'une base de données MySQL.
+L'API nécessite un serveur web (Apache ou NGinx) ainsi qu'une base de données MySQL.
 
-Le fichier `.env.local`, à créer, permet la configuration de certains élèments.
-```
-# Parametrage base de données et utilisateur
+Le fichier `.env.local`, à créer, permet la configuration de certains éléments :
+
+```sh
+# Paramétrage base de données et utilisateur
 DATABASE_URL=mysql://db_user:@db_host:db_port/db_name
 # Définit l'environnement à prod.
-APP_ENV=test
+APP_ENV=prod
 ```
-Pour l'installation complète, executez les commandes :
-```shell script
+
+Pour l'installation compléte, éxecutez les commandes :
+
+```sh
 # Import des librairies de prod via composer
 composer install --no-dev --optimize-autoloader
 # Création de la base de données si elle n'existe pas 
@@ -72,21 +77,76 @@ php bin/console doctrine:migration:migrate
 
 Url de base : `https://api.monsite.com/`
 
-L'API Note communique en JSON aussi bien en entrée qu'en sortie.
-
----
-**Attention**
-
-Le type MIME `application/x-www-form-urnlencoded` n'est pas supporté.
-
----
-
 Chaque requête doit contenir les headers :
-   - Content-Type : `application/json`
+   - Content-Type : `application/json` ou `application/x-www-form-urlencoded`
    - Accept: `application/json`
 
 
 ## Points d'entrée
+
+### Liste des élèves et moyenne de la classe
+- URI : `/api/students`
+- Méthode : GET
+- Réponses :
+    - 200 : Succès
+        ```json
+        {
+            "average": 5,
+            "students": [
+                   {
+                      "id": 1,
+                      "firstname": "Philippe",
+                      "lastname": "Pichet",
+                      "birthdate": "1987-08-25"
+                  }
+            ]
+        }
+        ```
+      
+##### Exemple cURL
+```sh
+curl -X GET \
+    -H "Accept: application/json" \
+  https://api.monsite.com/api/students
+```` 
+
+### Récupération d'un élève, ses notes et sa moyenne
+- URI : `/api/students/{id}`
+- Méthode : GET
+- Paramètres :
+  - `id` : identifiant correspondant à la ressource `Student`
+- Réponses :
+  - 200 : Succès
+      ```json
+      {
+          "id": 1,
+          "firstname": "Philippe",
+          "lastname": "Pichet",
+          "birthdate": "1987-08-25",
+          "average": 5,
+          "grades": [
+            {
+                "grade": 5,
+                "course": "Mathématiques"
+            }
+          ]
+      }
+      ```
+  - 404 : ressource `Student` introuvable
+      ```json
+      {
+          "errors": {
+            "resource": "Student not found"
+          }
+      }
+      ```
+#### Exemple cURL
+```sh
+curl -X GET \
+    -H "Accept: application/json" \
+  https://api.monsite.com/api/students/1
+``` 
+
 ### Ajout d'un élève
 - URI : `/api/students`
 - Méthode : POST
@@ -127,51 +187,13 @@ Chaque requête doit contenir les headers :
         }
         ```
 #### Exemple cURL
-```shell script
+```sh
 curl -X POST \
     -H "Accept: application/json" -H "Content-Type: application/json" \
     -d '{"firstname":"Philippe", "lastname": "Pichet", "birthdate": "1987-08-25"}' \
   https://api.monsite.com/api/students
 ```   
       
-### Récupération d'un élève
-- URI : `/api/students/{id}`
-- Méthode : GET
-- Paramètres :
-  - `id` : identifiant correspondant à la ressource `Student`
-- Requête :
-  Le corps de la requête est vide
-- Réponses :
-  - 200 : Succès
-      ```json
-      {
-          "id": 1,
-          "firstname": "Philippe",
-          "lastname": "Pichet",
-          "birthdate": "1987-08-25",
-          "average": 5,
-          "grades": [
-            {
-                "grade": 5,
-                "matter": "Mathématiques"
-            }
-          ]
-      }
-      ```
-  - 404 : ressource `Student` introuvable
-      ```json
-      {
-          "errors": {
-            "resource": "Student not found"
-          }
-      }
-      ```
-#### Exemple cURL
-```shell script
-curl -X GET \
-    -H "Accept: application/json" -H "Content-Type: application/json" \
-  https://api.monsite.com/api/students/1
-``` 
 ### Modification d'un élève
 - URI : `/api/students/{id}`
 - Méthode : PUT
@@ -223,7 +245,7 @@ curl -X GET \
         ```
 
 #### Exemple cURL
-```shell script
+```sh
 curl -X PUT \
     -H "Accept: application/json" -H "Content-Type: application/json" \
     -d '{"firstname":"Philippe", "lastname": "Pichet", "birthdate": "1987-08-25"}' \
@@ -238,7 +260,7 @@ curl -X PUT \
     ```json
     {
         "grade": 10,
-        "matter": "Mathématiques"
+        "course": "Mathématiques"
     }
     ```
 - Réponses :
@@ -247,7 +269,7 @@ curl -X PUT \
         {
             "id": 1,
             "grade": 10,
-            "matter": "Mathématiques",
+            "course": "Mathématiques",
             "student": {
                 "id": 1,
                 "firstname": "Philippe",
@@ -281,12 +303,13 @@ curl -X PUT \
         }
         ```
 #### Exemple cURL
-```shell script
+```sh
 curl -X POST \
     -H "Accept: application/json" -H "Content-Type: application/json" \
     -d '{"grade":10, "matter"}' \
   https://api.monsite.com/api/students
 ``` 
+
 ### Suppression d'un élève ainsi que de toutes ses notes
 - URI : `/api/students/{id}`
 - Méthode : DELETE
@@ -313,35 +336,8 @@ curl -X POST \
         }
         ```
 #### Exemple cURL
-```shell script
+```sh
 curl -X DELETE \
-    -H "Accept: application/json" -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
   https://api.monsite.com/api/students/1
 ```   
-### Liste des élèves
-- URI : `/api/students`
-- Méthode : GET
-- Requête :
-    Le corps de la requête est vide
-- Réponses :
-    - 200 : Succès
-        ```json
-        {
-            "average": 5,
-            "students": [
-                   {
-                      "id": 1,
-                      "firstname": "Philippe",
-                      "lastname": "Pichet",
-                      "birthdate": "1987-08-25"
-                  }
-            ]
-        }
-        ```
-      
-##### Exemple cURL
-```shell script
-curl -X GET \
-    -H "Accept: application/json" -H "Content-Type: application/json" \
-  https://api.monsite.com/api/students
-```` 
