@@ -13,7 +13,7 @@ class GradesType extends AbstractType
     {
         $builder
             ->add('grade')
-            ->add('matter')
+            ->add('course')
         ;
     }
 
