@@ -14,16 +14,14 @@ class GradesFixtures extends Fixture implements DependentFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        // Get the student passe in reference
-        $student = $this->getReference("student");
         // Loop to create 10 grades for the student. They be used in test
-        for ($index = 1; $index >= 10; $index++) {
+        for ($index = 1; $index <= 10; $index++) {
             // Generation of dynamic variables
-            ${"grade"  . $index} = new Grades();
-            ${"grade"  . $index}->setGrade($index)
-                ->setMatter("Matters")
-                ->setStudent($student);
-            $manager->persist(${"grade"  . $index});
+            $grade = new Grades();
+            $grade->setGrade($index)
+                ->setCourse("Course")
+                ->setStudent($this->getReference("student"));
+            $manager->persist($grade);
         }
         $manager->flush();
     }

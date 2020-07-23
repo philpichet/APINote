@@ -73,7 +73,7 @@ class StudentsController extends AbstractController
     public function show(?Students $student, GradesRepository $repository)
     {
         if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => 'Students not found']], 404);
+            return $this->json(["errors" => ['resource' => 'Student not found']], 404);
 
         $student->average = round($repository->getAverageOfStudent($student), 2);
         return $this->json($student, 200, [], ['groups' => ["student","studentAverage"], DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
@@ -91,7 +91,7 @@ class StudentsController extends AbstractController
     public function update(?Students $student, Request $request, EntityManagerInterface $em)
     {
         if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => "Students not found"]], 404);
+            return $this->json(["errors" => ['resource' => "Student not found"]], 404);
         $form = $this->createForm(StudentsType::class, $student);
         $this->processForm($request, $form);
         if ($form->isValid()) {
@@ -100,7 +100,7 @@ class StudentsController extends AbstractController
                 return $this->json($student, 200, [], ['groups' => "student", DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]);
             } catch (\Exception $e) {
                 // The update failed, we return an error code and content
-                return $this->json(["errors" => ['resource' => "Students has not been updated"]], 503);
+                return $this->json(["errors" => ['resource' => "Student has not been updated"]], 503);
             }
         }
         // We return the array of error
@@ -118,7 +118,7 @@ class StudentsController extends AbstractController
     public function addGrade(?Students $student, Request $request, EntityManagerInterface $em)
     {
         if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => "Students not found"]], 404);
+            return $this->json(["errors" => ['resource' => "Student not found"]], 404);
         $grade = new Grades();
         // Attache the grade to the student
         $student->addGrade($grade);
@@ -130,7 +130,7 @@ class StudentsController extends AbstractController
                 $em->flush();
                 return $this->json($grade, 201, [], ['groups' => ['newGrade', DateTimeNormalizer::FORMAT_KEY => "Y-m-d"]]);
             } catch (\Exception $ex) {
-                return $this->json(["errors" => ["resource" => "Grades has not been insert"]], 503);
+                return $this->json(["errors" => ["resource" => "Grade has not been insert"]], 503);
             }
         }
         return $this->json(["errors" => $this->processErrors($form)], 400);
@@ -147,7 +147,7 @@ class StudentsController extends AbstractController
     public function delete(?Students $student, Request $request, EntityManagerInterface $em)
     {
         if (!$student instanceof Students)
-            return $this->json(["errors" => ['resource' => "Students not found"]], 404);
+            return $this->json(["errors" => ['resource' => "Student not found"]], 404);
 
         $em->remove($student);
         try {
@@ -155,7 +155,7 @@ class StudentsController extends AbstractController
             return $this->json(null, 204);
         } catch (\Exception $e) {
             // The delete failed, we return an error code and content
-            return $this->json(["errors" => ['resource' => "Students has not been deleted"]], 503);
+            return $this->json(["errors" => ['resource' => "Student has not been deleted"]], 503);
         }
 
     }
